@@ -10,14 +10,13 @@ namespace Visuha.Algo.Services.Text
         private string _candidate;
         private int _candidateIndex;
 
-        public Sentence(Sentence source)
+        public Sentence() : this(Enumerable.Empty<string>())
         {
-            _words = source._words.ToList();
         }
 
-        public Sentence()
+        public Sentence(IEnumerable<string> words)
         {
-            _words = new List<string>();
+            _words = words.ToList();
         }
 
         public IReadOnlyList<string> Words => _words.AsReadOnly();

@@ -14,29 +14,22 @@ namespace Visuha.Algo.Services.Text
 
         public IEnumerable<IEnumerable<string>> Split(string source)
         {
-            var sentences = new HashSet<Sentence>();
-            using (var en = source.GetEnumerator())
-            {
-                if (en.MoveNext())
-                {
-                    char c = en.Current;
-                    InitializeSentences(sentences, c);
+            ICollection<Sentence> sentences = new HashSet<Sentence>();
 
-                    while (en.MoveNext())
+            using (IEnumerator<char> chars = source.GetEnumerator())
+            {
+                if (chars.MoveNext())
+                {
+                    InitializeSentences(sentences, chars.Current);
+
+                    while (chars.MoveNext())
                     {
-                        c = en.Current;
-                        foreach (Sentence sentence in sentences.ToArray())
+                        char c = chars.Current;
+                        foreach (Sentence sentence in sentences.ToArray()) // making a copy since sentences can be modified
                         {
                             if (sentence.CandidatePromoted())
                             {
-                                sentences.Remove(sentence);
-                                foreach (string word in FindWords(c))
-                                {
-                                    var newSencence = new Sentence(sentence);
-                                    newSencence.NewCandidate(word);
-
-                                    sentences.Add(newSencence);
-                                }
+                                DiscoverNewCandidates(sentences, sentence, c);
                             }
                             else
                             {
@@ -63,14 +56,44 @@ namespace Visuha.Algo.Services.Text
             }
         }
 
-        private void InitializeSentences(ICollection<Sentence> sentences, char firstChar)
+        private void InitializeSentences(ICollection<Sentence> sentences, char c)
         {
-            foreach (string word in FindWords(firstChar))
+            using (IEnumerator<string> candidates = FindWords(c).GetEnumerator())
             {
-                var sentence = new Sentence();
-                sentence.NewCandidate(word);
+                InitializeSentences(sentences, new string[0], candidates);
+            }
+        }
 
+        private static void InitializeSentences(
+            ICollection<Sentence> sentences,
+            IReadOnlyCollection<string> words,
+            IEnumerator<string> candidates)
+        {
+            while (candidates.MoveNext())
+            {
+                var sentence = new Sentence(words);
                 sentences.Add(sentence);
+
+                sentence.NewCandidate(candidates.Current);
+            }
+        }
+
+        private void DiscoverNewCandidates(ICollection<Sentence> sentences, Sentence original, char firstChar)
+        {
+            using (IEnumerator<string> candidates = FindWords(firstChar).GetEnumerator())
+            {
+                if (candidates.MoveNext())
+                {
+                    string firstWord = candidates.Current;
+
+                    InitializeSentences(sentences, original.Words, candidates);
+
+                    original.NewCandidate(firstWord);
+                }
+                else
+                {
+                    sentences.Remove(original); // no matches on firstChar
+                }
             }
         }
 

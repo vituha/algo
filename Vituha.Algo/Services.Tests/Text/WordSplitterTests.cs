@@ -45,7 +45,23 @@ namespace Visuha.Algo.Services.Text
         }
 
         [Fact]
-        public void Hard()
+        public void LastCharNotMatching()
+        {
+            var sut = new WordSplitter(new[] { "x" });
+
+            sut.Split("xy").Should().BeEmpty();
+        }
+
+        [Fact]
+        public void FirstCharNotMatching()
+        {
+            var sut = new WordSplitter(new[] { "y" });
+
+            sut.Split("xy").Should().BeEmpty();
+        }
+
+        [Fact]
+        public void RealLife()
         {
             var sut = new WordSplitter(new[] { "girl", "boy", "friend", "end", "girlfriend", "boyfriend" });
 
