@@ -23,11 +23,18 @@ namespace Problem
                 Console.Write("Enter problem number (0 - for exit): ");
                 string inputString = Console.ReadLine();
                 int problemIndex;
-                if (int.TryParse(inputString, out problemIndex) && TryRun(problemIndex))
+                if (int.TryParse(inputString, out problemIndex))
                 {
-                    break;
+                    if (problemIndex == 0)
+                    {
+                        break;
+                    }
+
+                    if (!TryRun(problemIndex))
+                    {
+                        Console.WriteLine("Solution is not yet implemented.");
+                    }
                 }
-                Console.WriteLine("Solution is not yet implemented.");
             } while (true);
 
             Console.WriteLine("Done. Press <Enter> to exit...");
@@ -36,11 +43,6 @@ namespace Problem
 
         private static bool TryRun(int problemIndex)
         {
-            if (problemIndex == 0)
-            {
-                return true;
-            }
-
             var typeName = "Problem" + problemIndex;
             Type type;
             if (!_problemByName.TryGetValue(typeName, out type))
